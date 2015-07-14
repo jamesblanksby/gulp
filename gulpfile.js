@@ -15,7 +15,7 @@ var error_notify = function(error) {
     notifier.notify({
         title: error.name + ': ' + error.plugin,
         message: error.message,
-        icon: 'http://cnet4.cbsistatic.com/hub/i/r/2013/02/04/5e54fcb6-6de8-11e3-913e-14feb5ca9861/resize/270xauto/5dc66f7513da9d66450373bebbe2fe42/ProblemReporterIconX.png'
+        icon: 'http://static.blanks.by/HlYhKOWvuB.png'
     });
 }
  
