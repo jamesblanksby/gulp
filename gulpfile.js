@@ -28,7 +28,7 @@ var error_notify = function(error) {
 gulp.task('scss', function() {
     gulp.src(path.scss + '*.scss')
         .pipe(sass({
-            style: 'expanded'
+            outputStyle: 'expanded'
         }))
         .on('error', error_notify)
         .pipe(prefix('last 2 version'))
