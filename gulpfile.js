@@ -4,6 +4,7 @@ var gulp     = require('gulp');
  
 var notifier = require('node-notifier');
 var sass     = require('gulp-sass');
+var maps     = require('gulp-sourcemaps');
 var prefix   = require('gulp-autoprefixer');
 var csscomb  = require('gulp-csscomb');
 var jshint   = require('gulp-jshint');
@@ -11,9 +12,9 @@ var reload   = require('gulp-livereload');
 var shell    = require('gulp-shell');
 
 var path = {
-	css: 'src/css',
-	scss: 'src/scss/',
-	script: 'src/script/'
+    css: 'src/css/',
+    scss: 'src/scss/',
+    script: 'src/script/'
 };
  
 var error_notify = function(error) {
@@ -27,10 +28,12 @@ var error_notify = function(error) {
  
 gulp.task('scss', function() {
     gulp.src(path.scss + '*.scss')
+        .pipe(maps.init())
         .pipe(sass({
             outputStyle: 'expanded'
         }))
         .on('error', error_notify)
+        .pipe(maps.write())
         .pipe(prefix('last 2 version'))
         .pipe(csscomb())
         .pipe(gulp.dest(path.css))

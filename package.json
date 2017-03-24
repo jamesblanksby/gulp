@@ -1,12 +1,14 @@
 {
-	"devDependencies": {
-		"gulp": "*",
-		"gulp-autoprefixer": "*",
-		"gulp-csscomb": "*",
-		"gulp-jshint": "*",
-		"gulp-livereload": "*",
-		"node-notifier": "*",
-		"gulp-sass": "*",
-		"gulp-shell": "*"
-	}
+    "devDependencies": {
+        "gulp": "*",
+        "gulp-autoprefixer": "*",
+        "gulp-sourcemaps": "*",
+        "gulp-csscomb": "*",
+        "gulp-jshint": "*",
+        "gulp-livereload": "*",
+        "node-notifier": "*",
+        "gulp-sass": "*",
+        "gulp-shell": "*",
+        "jshint": "*"
+    }
 }
