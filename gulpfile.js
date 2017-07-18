@@ -18,10 +18,10 @@ var path = {
 };
  
 var error_notify = function(error) {
-    error.message = error.message.replace('\n', '');
+    error.messageOriginal = error.messageOriginal.replace(/\s+/g,' ').trim();
     notifier.notify({
         title: error.name + ': ' + error.plugin,
-        message: error.message,
+        message: 'Line: ' + error.line + ' Column: ' + error.column + ' - ' + error.messageOriginal,
         icon: 'http://static.blanks.by/HlYhKOWvuB.png'
     });
 }
