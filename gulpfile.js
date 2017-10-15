@@ -1,73 +1,88 @@
 'use strict';
  
-var gulp     = require('gulp');
- 
-var notifier = require('node-notifier');
-var sass     = require('gulp-sass');
-var maps     = require('gulp-sourcemaps');
-var prefix   = require('gulp-autoprefixer');
-var csscomb  = require('gulp-csscomb');
-var jshint   = require('gulp-jshint');
-var reload   = require('gulp-livereload');
-var shell    = require('gulp-shell');
+/* node */
+var gulp = require('gulp');
+var path = require('path');
 
-var path = {
-    css: 'src/css/',
-    scss: 'src/scss/',
-    script: 'src/script/'
+/* gulp */
+var sass   = require('gulp-sass');
+var reload = require('gulp-livereload');
+var prefix = require('gulp-autoprefixer');
+var jshint = require('gulp-jshint');
+var shell  = require('gulp-shell');
+var map    = require('gulp-sourcemaps');
+
+/* glob */
+var glob = {
+    scss: './src/scss/**/*.scss',
+    script: './src/script/**/*.js'
 };
- 
-var error_notify = function(error) {
-    error.messageOriginal = error.messageOriginal.replace(/\s+/g,' ').trim();
-    notifier.notify({
-        title: error.name + ': ' + error.plugin,
-        message: 'Line: ' + error.line + ' Column: ' + error.column + ' - ' + error.messageOriginal,
-        icon: 'http://static.blanks.by/HlYhKOWvuB.png'
-    });
-}
- 
-gulp.task('scss', function() {
-    gulp.src(path.scss + '*.scss')
-        .pipe(maps.init())
-        .pipe(sass({
-            outputStyle: 'expanded'
+
+/* error */
+var error = function(file, line, column, reason) {
+    console.log(' > ' + file + ': ');
+    console.log('   + ' + 'line ' + line + ', ' + 'column ' + column);
+    console.log('   + ' + reason);
+};
+
+/* task:scss */
+gulp.task('scss', gulp.parallel(function(done) {
+    gulp.src(glob.scss)
+        .pipe(map.init())
+        .pipe(sass({ 
+            outputStyle: 'compressed' 
+        }).on('error', function(err) {
+            console.log('\nSCSS Syntax Issues:');
+            error(err.relativePath, err.line, err.column, err.messageOriginal);
+            console.log('');
+            gulp.src(glob.scss).pipe(shell('open -a Terminal'));
+
+            this.emit('end');
         }))
-        .on('error', error_notify)
-        .pipe(maps.write())
-        .pipe(prefix('last 2 version'))
-        .pipe(csscomb())
-        .pipe(gulp.dest(path.css))
+        .pipe(prefix({
+            browsers: ['last 2 versions'],
+            cascade: false
+        }))
+        .pipe(map.write())
+        .pipe(gulp.dest(function(file) { 
+            return path.join(path.dirname(file.path), '../css'); 
+        }))
         .pipe(reload());
-});
- 
-gulp.task('script', function() {
-    var error_count = 0;
-    gulp.src(path.script + '*.js')
+
+    done();
+}));
+
+/* task:script */
+gulp.task('script', gulp.parallel(function(done) {
+    gulp.src(glob.script)
         .pipe(jshint())
         .pipe(jshint.reporter(function(errors) {
-            console.log('\nSyntax issues:');
-            errors.forEach(function(file) {
-                var error = file.error;
-                console.log(' + ' + file.file.split('/').pop() + ': line ' + error.line + ', col ' + error.character + ', ' + error.reason);
-                error_count++;
+            console.log('\nScript Syntax Issues:');
+            errors.forEach(function(err) {
+                error(err.file, err.error.line, err.error.character, err.error.reason);
             });
             console.log('');
-            gulp.src(path.script + '*.js').pipe(shell('open -a Terminal'));
+            gulp.src(glob.script).pipe(shell('open -a Terminal'));
         }))
         .pipe(jshint.reporter('fail'))
-        .on('error', error_notify);
-});
- 
-gulp.task('watch', function() {
+        .on('error', function(err) {
+            this.emit('end');
+        })
+        .pipe(reload());
+
+    done();
+}));
+
+/* task:watch */
+gulp.task('watch', gulp.parallel(function(done) {
     reload.listen();
+
     gulp.watch(['*.html', '*.php']).on('change', reload.changed);
- 
-    gulp.watch(path.scss + '*.scss', ['scss']);
-    gulp.watch(path.script + '*.js', ['script']);
-});
- 
-gulp.task('default', [
-    'scss',
-    'script',
-    'watch'
-]);
+    gulp.watch(glob.scss).on('change', gulp.parallel(['scss']));
+    gulp.watch(glob.script).on('change', gulp.parallel(['script']));
+
+    done();
+}));
+
+/* task:default */
+gulp.task('default', gulp.parallel('watch', 'scss', 'script'));
