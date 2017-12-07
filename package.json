@@ -1,9 +1,11 @@
 {
     "devDependencies": {
+        "cli-color": "^1.2.0",
         "gulp": "github:gulpjs/gulp#4.0",
         "gulp-autoprefixer": "^4.0.0",
         "gulp-jshint": "^2.0.4",
         "gulp-livereload": "^3.8.1",
+        "gulp-rename": "^1.2.2",
         "gulp-sass": "^3.1.0",
         "gulp-shell": "^0.6.3",
         "gulp-sourcemaps": "^2.6.1",

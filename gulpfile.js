@@ -1,11 +1,13 @@
 'use strict';
  
 /* node */
-var gulp = require('gulp');
-var path = require('path');
+var gulp  = require('gulp');
+var path  = require('path');
+var color = require('cli-color');
 
 /* gulp */
 var sass   = require('gulp-sass');
+var rename = require('gulp-rename');
 var reload = require('gulp-livereload');
 var prefix = require('gulp-autoprefixer');
 var jshint = require('gulp-jshint');
@@ -14,27 +16,26 @@ var map    = require('gulp-sourcemaps');
 
 /* glob */
 var glob = {
-    scss: './src/scss/**/*.scss',
-    script: './src/script/**/*.js'
+    scss: '**/scss/**/*.scss',
+    script: '**/script/**/*.js'
 };
 
 /* error */
 var error = function(file, line, column, reason) {
-    console.log(' > ' + file + ': ');
-    console.log('   + ' + 'line ' + line + ', ' + 'column ' + column);
-    console.log('   + ' + reason);
+    console.log(`📄  ${color.blue(`${file}:`)} `);
+    console.log(color.white(` + line ${line}, column ${column}`));
+    console.log(color.white(` + ${reason}`));
 };
 
 /* task:scss */
 gulp.task('scss', gulp.parallel(function(done) {
-    gulp.src(glob.scss)
+    gulp.src(glob.scss, { base: '.' })
         .pipe(map.init())
         .pipe(sass({ 
             outputStyle: 'compressed' 
         }).on('error', function(err) {
-            console.log('\nSCSS Syntax Issues:');
+            console.log(`\n⚠️  ${color.yellow('SCSS Error:')}`);
             error(err.relativePath, err.line, err.column, err.messageOriginal);
-            console.log('');
             gulp.src(glob.scss).pipe(shell('open -a Terminal'));
 
             this.emit('end');
@@ -44,8 +45,11 @@ gulp.task('scss', gulp.parallel(function(done) {
             cascade: false
         }))
         .pipe(map.write())
-        .pipe(gulp.dest(function(file) { 
-            return path.join(path.dirname(file.path), '../css'); 
+        .pipe(rename(function(path) {
+            path.dirname += '/../css';
+        }))
+        .pipe(gulp.dest(function(file) {
+            return file.base;
         }))
         .pipe(reload());
 
@@ -57,14 +61,12 @@ gulp.task('script', gulp.parallel(function(done) {
     gulp.src(glob.script)
         .pipe(jshint())
         .pipe(jshint.reporter(function(errors) {
-            console.log('\nScript Syntax Issues:');
-            errors.forEach(function(err) {
+            console.log(`\n⚠️  ${color.yellow('Script Error:')}`);
+            errors.map(function(err) {
                 error(err.file, err.error.line, err.error.character, err.error.reason);
             });
-            console.log('');
             gulp.src(glob.script).pipe(shell('open -a Terminal'));
         }))
-        .pipe(jshint.reporter('fail'))
         .on('error', function(err) {
             this.emit('end');
         })
