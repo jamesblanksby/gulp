@@ -87,4 +87,6 @@ gulp.task('watch', gulp.parallel(function(done) {
 }));
 
 /* task:default */
-gulp.task('default', gulp.parallel('watch', 'scss', 'script'));
+gulp.task('default', gulp.parallel('watch', 'scss', 'script', function() {
+    console.log(`\n👂🏼  ${color.bold(`Listening for changes...`)}`);
+}));
